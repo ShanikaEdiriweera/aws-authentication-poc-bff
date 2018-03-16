@@ -1,4 +1,4 @@
-// index.js
+// index.js - login token provider lambda
 
 const serverless = require('serverless-http');
 const express = require('express')
@@ -9,38 +9,35 @@ const bodyParser = require('body-parser');
 // import jsonwebtoken from 'jsonwebtoken' 
 const jwt = require('jsonwebtoken');
 
+const PASSWORD = 'password'
+
 app.use(bodyParser.json({ strict: false }));
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
  extended: true
 }));
-
-app.get('/', function (req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-    res.send(JSON.stringify({ msg: "working" }));
-})
-
-// POST method route
-app.post('/data', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-
-  if (req.body.username=='vibodha'){
-    res.send(JSON.stringify({ msg: "loged in" }));
-  }
-  else{
-    res.send(JSON.stringify({ msg: "wrong" }));
-  }
-})
 
 // POST method for login
 app.post('/login', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
+  let username = req.body.username ? req.body.username : "user"
+  let password = req.body.password ? req.body.password : false
+  if (username && password && password !== PASSWORD){
+    res.status(401)
+    res.send('Incorrect password.')
+  }
+
   // sign with default (HMAC SHA256)
-  let token = jwt.sign({ foo: 'bar' }, 'cpas');
+  let payload = { 
+    iat: Math.floor(Date.now() / 1000), 
+    iss: 'login token provider lambda',
+    exp: (Date.now() + 24 * 60 * 60 * 1000)/1000,
+    username: 'username' 
+  }
+  let token = jwt.sign(payload, 'cpas')
   console.log("token: "+token)
+  
   //backdate a jwt 30 seconds
   // var older_token = jwt.sign({ foo: 'bar', iat: Math.floor(Date.now() / 1000) - 30 }, 'shhhhh');
 

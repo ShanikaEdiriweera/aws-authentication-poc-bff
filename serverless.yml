@@ -16,3 +16,15 @@ functions:
           path: /login
           method: post
           cors: true
+  
+  bff:
+    handler: app.handler
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+      - http:
+          path: /data
+          method: post
+          cors: true
